@@ -1,0 +1,36 @@
+name: "CursoR2024"
+navbar:
+  right:
+    - text: "Home"
+      href: "index.html"
+    - text: "Unidad1"
+      href: "Instalacion.html"
+    - text: "Unidad2"
+      href: "U2_Conceptos_básicos.html"
+    - text: "Unidad3"
+      href: "U3_Estructuras_de_datos.html"
+    - text: "Unidad4"
+      href: "U4_ImportarExportarDatos.html"
+    - text: "Unidad5.1"
+      href: "U5.1_CondicionesBucles.html"
+    - text: "Unidad5.2"
+      href: "U5.2_Funciones.html"
+    - text: "Unidad6"
+      href: "U6_GraficosR.html"
+    - text: "Unidad7.1"
+      href: "U7_tStudent.html"
+    - text: "Unidad7.2"
+      href: "Unidad_7.2_ANOVA.html"
+    - text: "Unidad7.3"
+      href: "Unidad_7.3_Correlation.html"
+
+output: 
+ html_document:
+   theme: flatly
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: style1.css
+ 
+      

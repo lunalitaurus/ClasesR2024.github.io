@@ -1,0 +1,201 @@
+---
+title: 'Unidad 7.3: Prueba de correlación'
+author: "Rubén Muñoz"
+date: "2024-02-16"
+output: 
+ html_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: custom.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Bienvenida
+En esta Unidad 7.3 aprenderemos acerca de la prueba de correlación de Pearson. Esta es una prueba que se usa con datos continuos en la cual se calcula el grado de covariación entre variables relacionadas linealmente.
+Esta prueba nos dará un coeficiente de correlación, el cual nos indicará qué tanta correlación existe entre dos variables.
+La correlación puede ser positiva o negativa y su valor máximo es de 1 o -1, respectivamente.
+
+<div style = "text-align:center"> 
+![:)](../imagenes/gatoTeclado.png){width=30%} 
+</div>
+
+En este caso trtaremos de ver si existen una correlación entre el PIB y la esperanza de vida mundial.
+
+
+
+
+### **Correlación**
+La prueba de correlación nos arrojará un coeficiente de correlación (r) y un valor de p, si el valor de $p < 0.05$ nos indica que la prueba es estadísticamente significativa.
+En cuanto al coeficiente se suele marcar un umbral del 75% para considerar asociación entre variables.
+```{r}
+#Paletas de color#Rampa de colores
+library(paletteer)
+library(colorBlindness)
+pal1 <- paletteer_d("colorBlindness::Green2Magenta16Steps")
+pal2 <- paletteer_c("ggthemes::Gold-Purple Diverging", 30)
+#Seleccionamos los datos
+library(gapminder)
+gapm <- gapminder
+gapm2007 <- gapm[gapm$year == "2007", ]
+# Realizamos la prueba de correlación
+cor.test(gapm$gdpPercap, gapm$lifeExp)
+```
+La prueba es significativa con un coeficiente de r = 0.61
+
+```{r}
+# Graficamos las variables
+plot(log10(gapm2007$gdpPercap), gapm2007$lifeExp,
+     xlab = "PIB mundial($)",
+     ylab = "Esperanza de vida promedio (años)",
+     pch = 21, cex = 1.5,
+     bg = "#85B47B", col = "darkgreen",
+     bty = "L")+ # Gráfico sin márgenes superior y derecho)
+text( x = 4.5, y = 42,  #Posición 
+       label = " ρ = 0.78",
+       cex = 1.2
+      )
+```
+No obstante,s iempre debemos verificar antes la normalidad de nuestros datos:
+```{r}
+shapiro.test(gapm2007$gdpPercap)
+shapiro.test(gapm2007$lifeExp)
+```
+
+Nuestros datos no siguen una distribución normal, por lo que usaremos la prueba no paramétrica de Spearman:
+```{r}
+cor.test(gapm$gdpPercap, gapm$lifeExp,
+         method = "spearman")
+```
+La prueba es significativa con un coeficiente de rho = 0.82.  
+
+### **Correlograma**  
+
+A veces es necesario evaluar la correlación entre una o más variables. Para ello podemos generar una matriz de correlación y verla visualemente en R (correlograma). Para ello usamos las siguientes librerías:
+```{r, results='hide'}
+#Una vez instaladas, cargar las librerias
+library(ggplot2)
+library(corrplot)
+library(mvnormtest)
+
+```
+
+En nuestro ejemplo usaremos un ejemplo de aplicación en el modelado de distribución potencial de especies.
+En este ejemplo realizaremos una matriz de correlación de variables ambientales relacionadas con la distribución de la coqueta de Guerrero (*𝘓𝘰𝘱𝘩𝘰𝘳𝘯𝘪𝘴 𝘣𝘳𝘢𝘤𝘩𝘺𝘭𝘰𝘱𝘩𝘶𝘴*). Esta una especie de la familia Trochilidae (colibríes). La especie es endémica de México. Su sobrevivencia está amenazada por la pérdida de hábitat. En México, la NOM-059-SEMARNAT-2010 la considera En Peligro de Extinción; la UICN como En Peligro Crítico.  
+<div style = "text-align:center"> 
+![Coqueta de Guerrero](../imagenes/coqueta.jpg){width=60%} 
+</div>
+
+
+Las variables ambientales se recabaron de [WorldClim](https://www.worldclim.org/) la cual es una base de datos climáticos históricos a nivel mundial. Además, de la altitud registrada en un Modelo de Elevación Digital (DEM) hecho por [INEGI](https://www.inegi.org.mx/) (mexdem).
+A partir de esta matriz de correlación podemos elegir las variables óptimas para contruir nuestro modelo de distribución de la especie.
+
+
+#### Supuestos
+En el caso de que tengamos más de dos variables podemos usar la librería *mvnormtest* para calcular la normalidad de múltiples datos. Los datos deben ser de clase *matrix*
+
+```{r}
+#Seleccionamos los datos
+LBrachyVar <- read.csv("../data/LophornisBrachylophusVariables.csv",
+                       header = T)
+
+#Aplicar la prueba de normalidad de Shapiro-Wilk
+#es necesario transponer (t) los datos
+mshapiro.test(t(LBrachyVar))
+```
+
+Como los datos no cunmplen el supuesto de normalidad usaremos la prueba de Spearman.
+
+```{r, fig.align='center', fig.width=11, fig.height=15}
+par(mfrow = c(3,2))
+#Genera el gráfico de correlación
+mt.cor <- cor(LBrachyVar, method="spearman")
+
+# A) Gráfico por default
+corrplot(mt.cor,
+         main = "A) Default")
+
+# B) Gráfico por método = color
+corrplot(mt.cor, method = 'color', #Colorea los cuadros
+         order = 'alphabet',#orden alfabético
+         tl.cex = 0.5, tl.col = "black", #Tamaño y color de las etiquetas
+         number.cex=0.55, addCoef.col = 'black', # Añadir coeficiente de correlación
+         diag = F,
+         main = "B) Method = color"
+         ) 
+
+# C) Gráfico por método = pie  y upper
+corrplot(mt.cor, method = 'pie', #Colorea las gráficas de pie
+         type = "upper", # Muestra solo la región de arriba
+         order = 'alphabet',#orden alfabético
+         tl.cex = 0.5, tl.col = "black", #Tamaño y color de las etiquetas
+         cl.cex=0.7, #Tamaño de la simbología
+         addCoef.col = 'black', # Añadir coeficiente de correlación
+         number.digits = 1,
+         number.cex=0.55,
+         main = "C) Pie + upper"
+         ) 
+
+# D) Otra forma del grafico: ellipse
+corrplot(mt.cor, method="ellipse",
+         tl.cex=0.4, tl.col = "black", 
+         tl.srt = 45, 
+         cl.cex=0.6,
+         col = COL2('PiYG'),
+         addCoef.col = 'black',
+         number.cex=0.55,
+         main = "D) ellipse+rampadecolores"
+         )
+
+# E) Leyenda inferior, diagonal con nombres
+corrplot(mt.cor, order = "alphabet",
+         method = "square",
+         cl.pos = 'b', # Leyenda en bottom
+         col = pal1, 
+         diag = FALSE, 
+         tl.cex = 0.5,
+         tl.pos = "d", #Nombre de variables en la diagonal
+         bg = "gray90", #Color de fondo
+         main = "E) square+rampadecolores"
+         )
+
+# F) Incorporando el valor de p 
+ pvalueCorr <- cor.mtest(LBrachyVar, conf.level = 0.95)
+ 
+ corrplot(mt.cor,
+         method = "color",
+         type = "lower",
+         p.mat = pvalueCorr$p,
+         sig.level = 0.05,
+         insig = "blank",
+         diag = FALSE,
+         addCoef.col = 'black', # Añadir coeficiente de correlación
+         number.digits = 2, # Num. digitos del coef
+         number.cex = 0.7, #Tamaño del coef
+         tl.col = "black",
+         tl.srt = 0, # Ángulo de las variables
+         cl.pos = 'b', # Leyenda en bottom
+         col = COL2('PiYG'), #Nombre de variables en la diagonal
+         bg = "gray95", #Color de fondo
+         addgrid.col = 'gray95',#Color de líneas
+         main = "F) valores de p"
+         )
+```
+
+De esta forma podemos generar gráficos con calidad para colocar en artículos y que nos permiten avanzar en nuestra investigación. Gracias a este correlograma podemos contruir un modelo para destinar zonas prioritarias de conservación para la coqueta de Guerrero.   
+_________________  
+
+Hemos terminado esta lección. Le agradezco su participación y espero que las herramientas vistas en este curso les sean de gran utilidad en su vida profesional y académica.
+
+<div style = "text-align:center"> 
+![Byebye:)](../imagenes/Default_create_a_cute_kitty_waving_his_paw_saying_goodbye_2.jpg){width=80%} 
+</div>
+
+
+
+

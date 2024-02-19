@@ -1,0 +1,73 @@
+---
+title: 'Unidad 5.2: Funciones'
+author: "Rubén Muñoz"
+date: "2024-01-27"
+output: 
+ html_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: custom.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Bienvenida**
+
+En esta lección aprenderemos de los elementos básicos de las funciones y su utilidad.
+
+## **Funciones**  
+### ¿Qué son?
+En R, una función es un bloque de código diseñado para realizar una tarea específica. Puedes pensar en ellas como mini-programas para realizar ciertas operaciones. Las funciones ayudan a organizar el código, hacerlo más legible, y reutilizarlo eficientemente.
+  
+### **Partes de una función**
+ * Nombre de la función: Es el identificador único que usas para llamar a la función.
+ * Argumentos: Son los valores que se pasan a la función para que trabaje.
+ * Cuerpo de la función: Es el bloque de código que realiza la tarea específica de la función.
+ * Valor de retorno: Es el resultado que devuelve la función después de realizar su tarea.
+ 
+### **Ejemplo de construcción de una función en R**
+Supongamos no existe la función `mean()` por lo que queremos escribir una función que calcule el promedio de una lista de números. 
+
+```{r}
+# Definimos la función
+calcular_promedio <- function(numeros) {
+  suma <- sum(numeros)
+  cantidad <- length(numeros)
+  promedio <- suma / cantidad
+  return(paste("El resultado de la suma es", promedio))
+}
+
+# Llamamos a la función con una lista de números
+mi_lista <- c(4, 7, 9, 2, 6)
+resultadoSuma <- calcular_promedio(mi_lista)
+print(resultadoSuma)
+#Comapramos con el  valor arrojado por mean()
+mean(mi_lista) == resultadoSuma
+
+```
+En este ejemplo:
+
+El nombre de la función es *calcular_promedio*.
+Tiene un argumento llamado *numeros*, que espera una lista de números.
+El cuerpo de la función calcula la suma de los números, cuenta cuántos números hay en la lista, calcula el promedio y lo devuelve.
+La función devuelve el promedio por medio de `return()`.
+
+```{r}
+library(gapminder)
+pruebaFuncion <- gapminder
+nombresUnicos  <- function(data, columna) {
+   columna <- as.character(columna)
+   identificador <- unique(data[columna])
+   
+}
+nombresUnicos(data = pruebaFuncion, columna = "year")
+unique(pruebaFuncion$year)
+```
+
+
+

@@ -1,0 +1,258 @@
+---
+title: 'Unidad 7: t de Student'
+author: "Rubén Muñoz"
+date: "2024-01-24"
+output: 
+ html_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: custom.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+getwd()
+```
+
+## **Bievenida**
+En esta lección aprederemos acerca de las pruebas estadísticas de t de Student:)
+Este tipo de pruebas nos permite comparar si existen diferencias significativas entre dos o más medias muestrales (t de Student y ANOVA, respectivamente).
+
+Este curso **no** es acerca de estadística por lo cual no se revisarán los aspectos teóricos sino más bien los elementos prácticos de las pruebas estadísticas. Se ha planteado mostrar las herramientas en R que nos permiten hacer estas pruebas las cuales usualmente son utilizadas aún por algunas licenciaturas en la UNAM.
+
+<div style="text-align:center"> 
+![Cute Kitty using R](../imagenes/kitty_in_R.jpg){width=45%}
+</div>
+
+## **Aspectos relevantes a considerar**  
+
+Antes de comenzar primero debemos recordar que las pruebas estadísticas que veremos se basan en el contraste de pruebas de hipótesis. De forma muy simplificada, tenemos una *Hipótesis nula* que indica que no existen diferencias entre nuestras muestras y una *Hipótesis alternativa* que establece que sí las hay (ejemplo: que no sean iguales, que una sea mayor a la otra o una sea menor).
+Segundo, cualquiera que sean nuestro conjunto de datos, éstos siguen un tipo de distribución de probabilidad. En el caso de la t de Student (prueba de t) y ANOVA se asume que siguen una distribución normal (de campana).
+Para realizar nuestras pruebas tendremos que definir nuestro juego de hipótesis. 
+
+Un ejemplo en el cual definimos nuestras hipótesis:
+	Se quiere conocer si el diámetro promedio de los árboles de *Ceiba pentandra* en el bosque tropical del sur de México difiere del promedio mundial de la especie. Si conocemos el diámetro promedio de mi población en el sur de México y del promedio mundial entonces establecemos lo siguiente.    
+
+  	  
+  H0: $\bar{x}= \mu$ (El diámetro promedio no cambia (es igual del promedio mundial)    
+	  
+  Ha: $\bar{x} \neq \mu$ (El diámetro promedio es diferente del promedio mundial)
+    
+Una vez declaradas nuestras hipótesis nos fijaremos en dos valores importantes:
+
+  * El estadístico de prueba.
+  * El valor de *p* (significancia estadística).
+
+## **t de Student**
+
+La prueba de t de Student se utiliza para comparar las medias de dos muestras. Esta prueba supone normalidad en los datos y existen varios tipos de pruebas.
+
+Prueba de t      | Objetivo
+------------     | -------------
+De una muestra   | Determinar si la media de la población es igual o no que un valor específico
+De dos muestras independientes           | Determinar si las medias de la población tienen diferencias significativas  (diferentes, ">" o "<")    
+De muestras dependientes  | Determinar si la media de la población es igual o diferente después de un tiempo $\mu1 \neq \mu2$
+
+#### Datos a usar
+
+Para la práctica usaremos los datos de [*Gapminder*](https://www.gapminder.org/about/about-gapminder/) la cual es una organización que se dedica a desafiar percepciones erróneas sobre el desarrollo global y utiliza datos para proporcionar una comprensión más precisa de las tendencias mundiales.Por lo que permite el acceso a datos e información estadística a nivel global. En R está disponible como la librería `gapminder`.
+
+```{r, eval=FALSE}
+# Instalar el paquete si no está instalado
+if (!requireNamespace("gapminder", quietly = TRUE)) {
+  install.packages("gapminder")
+}
+
+```
+
+```{r}
+# Cargar el paquete
+library("gapminder")
+
+# Cargar los datos de Gapminder
+gapm <- gapminder
+summary(gapm)
+```
+
+### Prueba de t de una muestra
+
+Estamos en el 2007 y estamos realizando un estudio para conocer la esperanza de vida de la población de América Una vez que muestreamos arduamente queremos conocer si la esperanza de vida promedio de lxs asiáticos es igual a la de la población mundial. En ese momento la esperanza de vida mundial promedio  era de 70 años, según datos del [Banco Mundial](https://www.bancomundial.org/es/home). 
+Declaramos nuestras hipótesis:
+
+HO : La esperanza de vida de lxs americanxs es igual al promedio mundial. 
+Ha: La esperanza de vida de lxs americanxs es diferente del promedio mundial. 
+
+```{r}
+# Seleccionamos los datos de América
+ amLifeExp <- gapm$lifeExp[gapm$continent == "Americas" & gapm$year == 2007]
+```
+
+
+### Verificación de supuestos
+Esta prueba asume normalidad de los datos, por lo que usamos la función `shapiro.test()` y nos fijamos que el valor de *p* sea mayor a 0.05, ya que esta prueba asume como hipótesis nula (HO) que los datos se distribuyen de manera normal.
+
+```{r}
+(amNorm <- shapiro.test(amLifeExp))
+
+```
+Una forma visual de tratar de saber si nuestros datos cumplen el supuesto de normalidad es un histograma y un gráfico de densidad.
+```{r, warning=FALSE, fig.align='center', fig.width=5, eval=FALSE}
+ hist(amLifeExp,
+      freq = F, # Al colocar False se dibuja con las densidades de probabilidad
+      col = "cornflowerblue", border = F)+
+lines(density(amLifeExp), col = "navy")
+```
+
+<div style="text-align:center"> 
+![](../imagenes/hist_azul.png){width=80%}
+</div>
+
+
+#### Prueba de t de una muestra
+Para realizarla usamos la función `t.test()`, en este caso debemos especificar la media con la que queremos comparar (70 años).
+
+```{r}
+(amt.test1group <- t.test(amLifeExp, 
+       mu = 70,  # Valor de comparación
+       alternative = "two.sided" # Tipo de Ha
+       ))
+```
+Para calcular el estadítico t usamos la siguiente función:
+```{r}
+# t.teorico. Prueba de dos colas 
+qt(p = 0.025, # Probabilidad
+   df = length(amLifeExp)-1,# grados de libertad: tamaño de la muestra menos 1
+   )
+qt(p = 0.975, # Probabilidad
+   df = length(amLifeExp)-1) # grados de libertad
+
+```
+
+Si el estadístico observado (t) es diferente del t.teórico y el valor de *p* es menor a 0.05 quiere decir que la prueba es significativa y podemos rechazar la HO, es decir, la esperanza de vida de lxs americanxs es diferente del promedio mundial. 
+
+### Prueba de t de dos muestras independientes
+ 
+ Somos botánicxs y después de nuestro trabajo de campo recopilamos datos de *Iris spp.*. Nosotrxs queremos saber si la longitud de los pétalos de la especie *Iris setosa* son en promedio de mayor tamaño que las de *I. versicolor*. Por lo tanto
+ Declaramos nuestras hipótesis:
+
+HO : La longitud de los pétalos de la especie *Iris setosa* NO son en promedio más grandes que las de *I. versicolor*. 
+Ha: La longitud de los pétalos de *Iris setosa* SON en promedio mayores que las de *I. versicolor*.
+
+```{r}
+# Preparamos los datos 
+head(iris)
+setosaPetalL <- iris$Petal.Length[iris$Species =="setosa"]
+versicolorPetalL <- iris$Petal.Length[iris$Species =="versicolor"]
+```
+
+### Verificación de supuestos
+Esta prueba asume normalidad de los datos, por lo que usamos la función `shapiro.test()` y nos fijamos que el valor de *p* sea mayor a 0.01, ya que esta prueba asume como hipótesis nula (HO) que los datos se distribuyen de manera normal.
+
+```{r}
+(setosaNorm <- shapiro.test(setosaPetalL))
+(versicolorNorm <- shapiro.test(versicolorPetalL))
+```
+
+Para ver su distribución: 
+```{r, eval=FALSE}
+hist(setosaPetalL, freq = F,
+     main = " ", xlab = "Largo de los pétalos",
+     col = "plum3", border = "plum4",
+     xlim = c(1,6))+
+hist(versicolorPetalL, 
+     add = T, # El argumento add nos pemrite superponerlos
+     freq = F, col = "lightpink1",
+     border = "lightpink3")
+  lines(density(setosaPetalL), col = "plum4")
+  lines(density(versicolorPetalL), col = "lightpink4")
+```
+
+<div style="text-align:center"> 
+![ ](../imagenes/hist_setosa_versicolor.png){width=90%}
+</div>
+
+También podemos compararlas visualmente con on boxplot:
+```{r, fig.align='center'}
+boxplot(setosaPetalL, versicolorPetalL,
+        ylab = "Especies",
+        xlab= "Longitud de pétalos",
+        col = c("plum2", "lightpink2"),
+        border = c("plum4", "lightpink4"),
+        outpch = 22,
+        horizontal = T,
+        names = c("Setosa", "Versicolor"))
+```
+
+
+Además esta prueba asume igualdad de varianzas por lo que usamos la función `leveneTest()`. Si el valor de p > 0.05 podemos considerar igualdad de varianzas.
+```{r}
+library(car)
+leveneTest(setosaPetalL, 
+         versicolorPetalL)
+var.test(setosaPetalL, 
+         versicolorPetalL)
+```
+
+#### Prueba de t de dos muestras
+
+```{r}
+(setosaVersicolorPetal_L <- t.test(setosaPetalL, 
+       versicolorPetalL,  # Valor de comparación
+       alternative = "greater",# Tipo de Ha
+       var.equal = F # Varianzas iguales o no
+       ))
+```
+Por lo tanto, no rechazamos la HO: La longitud de los pétalos de la especie *Iris setosa* NO son en promedio más grandes que las de *I. versicolor*.   
+
+### Prueba de t de dos muestras dependientes
+
+Esta prueba nos permite saber si la media muestral es igual, menor o mayor después de un tratamiento o tiempo.
+Por ejemplo, la esperanza de vida promedio en América en 2002 será  mayor o menor cinco años después?
+
+
+HO : La esperanza de vida de lxs americanxs en 2002 no es mayor que la del promedio cinco años después. 
+Ha: La esperanza de vida promedio de lxs americanxs en 2002 es mayor cinco años después.  
+
+```{r}
+# Seleccionamos los datos
+ amLifeExp2002 <- gapm$lifeExp[gapm$continent == "Americas" & gapm$year == 1992] 
+
+ amLifeExp2007 <- amLifeExp
+ 
+# Comprobamos normalidad
+(amNorm <- shapiro.test(amLifeExp2002))
+ 
+# Comprobamos homogeneidad de varianzas
+var.test(amLifeExp2002, 
+         amLifeExp2007)
+
+# Se cumplen los supuestos
+
+```
+
+```{r}
+#" Hacemos la prueba
+t.test(amLifeExp2007, amLifeExp2002,
+       paired = T,
+       alternative = "greater"
+       )
+```
+ Por lo tanto podemos afirmar que la esperanza de vida promedio en América fue mayor cinco años después.
+
+### Prueba no paramétrica
+
+En el caso de que nuestros datos no se cumplan el supuesto de normalidad podemos usar una prueba no paramétrica. Esta prueba en lugar de evaluar diferencias en las medias muestrales utiliza la mediana. La función es `wilcox.test()` y usa los mismos argumentos que `t.test()`
+
+```{r, eval=FALSE}
+#Prueba no paramétrica pareada
+wilcox.test(despues.prom, antes.prom, 
+           alternative = "two.sided",
+           paired = T
+           )
+
+```
+
+

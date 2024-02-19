@@ -1,0 +1,143 @@
+---
+title: 'Unidad 5: Condiciones y bucles básicos'
+author: "Rubén Muñoz"
+date: "2024-02-03"
+output: 
+ html_document: 
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: custom.css
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+getwd()
+```
+
+## **Bienvenida**
+Hola a todxs! En esta sesión veremos algunas estructuras útiles para verificar condiciones o iterar ciertas acciones a nuestros datos. 
+
+<div style = "text-align:center"> 
+![](https://www.austrovet.com/wp-content/uploads/2020/10/gato-esterilizado-1140x570.jpg){width=60%} 
+</div>
+
+Para ello cargaremos los datos de esperanza de vida en México desde el 2010 guardado en la carpeta `data`
+
+```{r, include=FALSE, eval=FALSE}
+esperanzaVida <- read.csv("../data/Mortalidad_09.csv")
+years <-sort(rep(2010:2024, 3))
+Tot_H_M <- c("Total", "Hombres", "Mujeres")
+nombres <- rep(Tot_H_M, length(years)/length(Tot_H_M))
+nuevosNombres <- c("EntidadFederativa",paste0(nombres,years))
+colnames(esperanzaVida) <- nuevosNombres
+
+```
+
+```{r}
+#Cargamos los datos
+espVida <- read.csv("../data/MortalidadMex.csv")
+
+```
+
+
+## **Estructuras condicionales**
+### Condición `if`
+Esta estructura permite que una acción se ejecute si una condición que establecemos se cumple.
+La estructura es la siguiente:
+
+```{r, results='hide', eval = FALSE}
+if (condición) {
+  realizar_accion
+}
+
+```
+Adicionalmente podemos usar `else` por si la condicón no se cumple. Ejemplo:
+```{r}
+#Asignamos un valor
+x <- 3
+# Realizamos la comparación queremos saber si mi valor es menor a 7
+if (x < 7) {
+  print("Se cumple la condición")
+} else {
+  "No se cumple:("
+}
+```
+
+### Condición `ifelse` 
+
+Con `ifelse` podemos verificar si vectores cumplen la conclusión o no, en lugar de hacer un `if` por cada elemento. El primer argumento será nuestro vector, el segundo nuestra acción si es `TRUE` y tercero la acción si es `FALSE`.
+En este caso veremos para lso primeros 10 estados de la república si la esperanza de vida es mayor a 75 años.
+```{r}
+ifelse(espVida$Total2022[1:10] > 75, #Condición
+       "Se cumple", #Valor si T
+       "Chin" # valor si F
+       )
+```
+
+
+## **Estructuras iterativas**
+
+### Bucle `for`
+
+Este bucle permite realizar un conjunto de operaciones o ontrucciones para cada elemento de una lista o vector. Su sintaxis básica es la siguiente:
+
+```{r, results='hide', eval=FALSE}
+for (variable in vector) {
+  "haz cosas"
+}
+```
+
+```{r}
+for (valor in espVida$Total2022[1:10]) {
+  print(valor/3)
+  # Si queremos que el resultado se imprima en la consola debemos poner un print()
+}
+
+## También podemos asignar estructuras de datos dentro del bucle
+### Es buena práctica crear el vector vacío fuera primero
+diferencia <- c() 
+
+#Creamos el bucle
+for (i in espVida$Total2022[1:10]) {
+  diferencia <- c(diferencia, i - 75)
+  
+}
+#Imprimimos el resultado
+diferencia
+```
+
+### Bucle `while`
+
+Este bucle permite ejecutar una serie de acciones mientras una condición sea `TRUE`. COn esta estructura debemos ser cuidadosos ya que si la condición nunca se cumple la ejcución de acciones seguirá indefinidamente. Si nos sucede deberemos presionar la tecla `ESC` o detener a R en la sección de `consola` de RStudio.
+
+```{r}
+x <-  c(1)
+while (x < 5) {
+  # Le indicamos qué debe hacer
+  x <- x + 1
+  print("Es menor")
+
+}
+```
+
+Podemos usar `break` para que los bucles se detengan en algún valor que definamos.
+
+```{r}
+x <-  c(1)
+while (x < 10) {
+  
+  # Colocamos la condición para detener
+  if(x == 8) {
+    break
+  }
+  # Le indicamos qué debe hacer
+  x <- x + 1
+  print(x)
+
+}
+```
+
+

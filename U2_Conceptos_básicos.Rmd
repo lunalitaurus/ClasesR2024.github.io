@@ -1,0 +1,164 @@
+---
+title: "Unidad 2: Conceptos básicos"
+author: "Rubén Muñoz"
+date: "2024-01-24"
+output:  
+ html_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: custom.css
+
+---
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+<div style="text-align:center"> 
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/RStudio_logo_flat.svg/1280px-RStudio_logo_flat.svg.png){width=20%}
+</div>
+ 
+## Bienvenida 
+En esta sesión veremos los **Conceptos básicos de R**
+ 
+## **Consola de R** 
+
+Una vez hayamos descargado R veremos la consola de la siguiente forma:   
+![Consola de R](https://rafalab.dfci.harvard.edu/dslibro/R/img/R_console.png)  
+
+En ésta se puede trabajar por ejemplo si sumamos dos números de la sig. manera:
+```{r}
+1 + 1 # Aquí utilizamos el operador "+"
+
+```
+## **Interfaz con RStudio**
+Sin embargo, R Studio nos proporciona una interfaz amigable e intituiva donde podemos trabajar de forma más eficiente:
+
+![Interfaz_RStudio](../imagenes/interfaz_RStudio.png)
+
+##   **Objetos**  
+Todo los datos y estructuras en R son objetos, con ellos trabajaremos con ellos desde constantes hasta estructuras de datos.
+
+## **Constantes y variables** 
+
+Una constante es un objeto cuyo valor se encuentra definido y no podemos cambiar. Al contrario una **variable** es un objeto al cual podemos asignarle un valor  y un identificador.   
+Para declarar una variable se puede hacer de la siguiente forma con los símbolos `<-`:
+```{r }
+variable <- 5 # Esta es la forma más común
+variable = 5
+5 -> variable
+```
+Sin embargo, por convención se usa la primera. 
+Al realizar esta asiganción también podemos generar un vector, el cual es un objeto que puede contener dentro de él más datos. Por lo que podemos hacer un vector con varios números con la función `c()` (Se deben separar los elementos por comas):
+```{r }
+ v1 <- c(5,3,2,100) # Puede contener enteros
+ v2 <- c(1:5, 1.5,100) # O números enteros y decimales
+ print(v1)
+ v1
+```
+
+## **Tipos de datos**  
+En R hay diferentes tipos de datos, los cuales son muy importantes conocer porque serán los que nos permitan trabajar con ellos posteriormente.
+  
+### Enteros y numéricos
+Como su nombre lo indica los **enteros** representan a los números enteros, mientras que los **numéricos** presentan una parte decimal.   
+```{r , echo = FALSE}
+#Ejemplo de un entero
+ 1 
+#Ejemplo de un númerico
+ 1.55
+```
+
+### Cadenas de texto
+Éstas son del tipo *character* y podemos asignarlas a variables si las delimitamos por comillas dobles o simples: 
+```{r }
+ cadena <- "Hola:)"
+```
+De igual forma podemos hacer un vector con cadenas de texto.  
+
+###   Factor  
+Los **factores** son datos que nos sirven para representar datos categóricos. La forma de generarlos es a traves de: 
+```{r }
+ ejemplo_factor <- factor(c("F", "M", "F", "F")) #Usando factor() podemos definir un factor
+ ejemplo_factor
+```
+  
+### Lógico
+Son objetos con dos únicos valores `TRUE` o `FALSE`. Y se usan para verificar condiciones.
+
+### NA y NULL
+Los `NA` se usan para representar datos perdidos, mientras que `NULL` representa la ausencia de datos.  
+
+### Verificar tipo de datos
+Para verificar el tipo de dato con el que estamos trabajando usaremos la función `class()`:
+```{r }
+ class(variable)
+ class(v1)
+ class(cadena)
+ class(ejemplo_factor)
+ class(TRUE)
+```
+### Operaciones básicas 
+Se pueden hacer distitntas operaciones dependiendo el tipo de dato que trabajemos.
+```{r }
+6 + 6 #Suma
+6-2 #Resta
+6/2 #División
+6^2 # Potencia (teclas AltGr+Ñ)
+sqrt(6) # Raíz cuadrada
+6>2 #Mayor que. Devuelve TRUE si la condición se cumple
+6 >= 2 # Mayor o igual
+6 < 2 #Menor 
+6 <= 2
+6 == 2 # Igual
+"hola" == "hola" # La condición de igualdad tmb se puede aplicar a cadenas de textos para saber si son iguales
+6 != 5 # Es diferente de
+```
+
+###   Coerción  
+Se refiere a volver un dato de cierto tipo (sea numérico, string, etc) a otra clase. Usualmente usamos la función `as.x()`. Por ejemplo: 
+```{r}
+ class(5) # Es un número
+ class("5") # COmo esta en comillas es un Character
+# Usaremos la función as.numeric() para convertir de cadena de texto a numérico
+ as.numeric("5") + 5 # Así convertimos un número como cadena hacia ser un número para operar
+ 
+```
+  Las funciones `as.()` pueden ser `as.numeric()`, `as.integer()`, `as.factor()`, entre otras.  
+
+###   Paquetes 
+Un paquete se conforma por un conjunto de funciones y datos que se pueden instalar y usar en nuestro R. 
+Para descargar un paquete por primera vez se usa `install.packages("nombre_del_paquete_entre_comillas")`.     
+Para usarlos se deben llamar, con la función `library(nombre_del_paquete_sin comillas)` siempre que se quiera usar.  
+
+### Funciones (introducción básica)
+¿Para qué sirven? Las funciones son líneas de código que aceptan parámetros para ejecutar una acción determinada con dichos valores. En R hay una gran variedad de funciones aunque también podríamos generar las propias.   
+ 
+### Funciones básicas por defecto
+En R existen funciones precargadas cuando lo instalamos. Ejemplo de éstas y que nos pueden servir para este curso son:
+```{r, results='hide'}
+#Creamos un vector para mostrarles
+e1 <- c( 4, 5, 4.555, 6:20)
+ length(e1) # número de elementos
+ head(e1) # Primeros renglones de un conjunto de datos
+ tail(e1) # Ultimos renglones de un conjunto de datos
+ sum(e1)  # Suma los valores dados
+ max(e1)  # Número máximo
+ min(e1)  # Mínimo
+ range(e1) # Rango (max y min)
+ table(e1) # Cuenta el número de veces que un valor aparece
+ mean(e1) # Media 
+ median(e1) # Mediana
+ round(e1, 2) #Redondea los valores a los decimales que indiquemos
+ summary(e1) # Resume los aspectos más relevantes de nuestros datos
+```
+
+##### Con el conocimiento que tenemos hasta ahora ya podríamos hacer algunas operaciones básicas y generar variables para trabajar.  ¡Nos vemos en la siguiente unidad!.
+  
+<div style="text-align:center"> 
+![Cute Kitty says goodbye](../imagenes/kitty_glasses.png){width=25%}
+</div>

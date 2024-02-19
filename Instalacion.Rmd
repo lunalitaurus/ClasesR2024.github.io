@@ -1,0 +1,73 @@
+---
+title: 'Unidad 1: Instalación de R y RStudio'
+author: "Rubén Muñoz"
+date: "2024-01-24"
+output: 
+ html_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: custom.css
+
+---
+
+## **Bienvenida**
+
+Hola a todxs, en esta unidad aprenderemos a usar R, el cual es un lenguaje de programación ampliamente usado para manipulación, análisis y visualización de datos. 
+
+<div style="text-align:center"> 
+![](../imagenes/gatoCompu.png)
+</div>
+
+#### **R**
+
+El lenguaje de programación R ha adquirido una importancia significativa en el ámbito de la estadística y la ciencia de datos. Su popularidad se debe a diversas características que lo hacen especialmente adecuado para el análisis y la visualización de datos. Algunas características ventajosas de R son: 
+
+* Estadísticas y Análisis de Datos
+* Gráficos y Visualización
+* Reproducibilidad y Documentación
+* Comunidad Activa
+
+R brinda a los usuarios una herramienta potente y especializada para realizar una gran cantidad de análisis.
+
+## **Instalación de R**
+
+Para instalar R visitaremos la Página de [**CRAN**](https://cran.r-project.org/index.html)
+En este lugar encontraremos la documentación de R y diferentes descargas dependiendo el sistema operativo.
+
+<div style="text-align:center"> 
+![](../imagenes/R_CRAN.png){width=80%}
+</div>
+
+Posteriormente elegiremos nuestro sistema operativo y haremos click en la opción *install R for the first time*
+
+<div style="text-align:center"> 
+![](../imagenes/installRFirstTime.png){width=80%}
+</div>
+
+Haremos Click en la opción *Download R*
+
+<div style="text-align:center"> 
+![](../imagenes/downloadR.png){width=80%}
+</div>
+
+Seguiremos cada paso hasta que se instale y se cree un acceso directo en nuestra computadora.
+
+
+## **Instalación de RStudio**
+
+Para Instalar RStudio visitaremos la página [RStudio Desktop](https://posit.co/download/rstudio-desktop/).
+Instalaremos en el ícono de installar RStudio (Paso 2:)
+
+<div style="text-align:center"> 
+  ![](../imagenes/installRStudio.png){width=70%}
+</div>
+
+La descarga comenzará y tendremos que seguir los pasos que el ejecutable nos indique. No se preocupen por sus equipos, es segura la descarga.
+Al final de la descarga tendremos un ícono como éste en nuestra computadora:
+
+<div style="text-align:center"> 
+![](../imagenes/RStudioApp.png){width=50%}
+</div>
+

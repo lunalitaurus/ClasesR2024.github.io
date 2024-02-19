@@ -1,0 +1,47 @@
+---
+output: 
+ html_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: style1.css
+---
+# **Curso R 2024**
+### Aprende R: Curso Básico
+¡Bienvenido al Curso Básico de R!
+
+<div class="container">
+> ### **¿Qué es R?**
+
+R es un lenguaje de programación estadística ampliamente utilizado en el análisis de datos y la visualización. Es gratuito, de código abierto y cuenta con una amplia comunidad de usuarios y desarrolladores que contribuyen constantemente al crecimiento y la mejora del software.
+
+> ### **¿Por qué aprender R?** 
+
+* Poderoso: R ofrece una amplia gama de herramientas estadísticas y gráficas para analizar y visualizar datos.
+* Versátil: Es utilizado en una variedad de campos, incluyendo ciencias sociales, biología, medicina, finanzas y más.
+* Comunidad activa: La comunidad de usuarios de R es grande y activa, lo que significa que siempre hay recursos y ayuda disponibles.
+* Desarrollo profesional: El dominio de R puede mejorar tus perspectivas laborales y abrirte nuevas oportunidades en el campo del análisis de datos.
+
+> ### **¿Qué aprenderás en este curso?**
+
+En este curso básico de R, cubriremos los fundamentos que necesitas para comenzar a utilizar R para el análisis de datos. Algunos de los temas que cubriremos incluyen:
+
+Introducción a R y RStudio
+Manipulación de datos con R
+Visualización de datos 
+Estadísticas descriptivas
+Y mucho más!
+  
+> ### **¿Quién debería tomar este curso?**  
+
+Este curso está diseñado para principiantes que deseen aprender R desde cero. No se requiere experiencia previa en programación o estadísticas, ¡solo una mente curiosa y ganas de aprender!
+
+> ### **¿Cómo empezar?**
+
+¡Es fácil empezar! Regístrate ahora para acceder al curso y dar el primer paso hacia el dominio de R y el análisis de datos.
+</div>
+
+<div class = "img" > 
+![](./imagenes/kitty_glasses.png)
+</div>

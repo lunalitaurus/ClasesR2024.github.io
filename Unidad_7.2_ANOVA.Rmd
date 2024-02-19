@@ -1,0 +1,285 @@
+---
+title: 'Unidad 7.2: ANOVA'
+author: "Rubén Muñoz"
+date: "2024-02-12"
+output: 
+ html_document:
+   fig_caption: yes
+   toc: yes
+   toc_depth: 3
+   toc_float: yes
+   css: custom.css
+---
+
+## **Bienvenida**
+
+El ANOVA (Análisis de Varianza) es una prueba estadística utilizada para comparar las medias de tres o más grupos independientes. Se utiliza para determinar si hay diferencias significativas entre los grupos con base en las variaciones observadas entre ellos. ANOVA divide la variabilidad total en dos componentes: la variabilidad dentro de los grupos y la variabilidad debida a diferencias entre los grupos.
+
+Al igual que la prueba de t de Student, ANOVA asume que los datos siguen una distribución normal. Sin embargo, esta , la suposición principal es que los residuos (las diferencias entre los valores observados y los valores esperados por el modelo) siguen una distribución normal. Además de que supone igualdad de varianzas.
+
+Por ejemplo, si queremos saber si la población  mundial promedio  en 2007 es diferente por continente.
+
+```{r}
+# Cagamos los datos
+# Cargar el paquete
+library("gapminder")
+
+# Cargar los datos de Gapminder
+gapm <- gapminder
+gapm2007 <- gapm[gapm$year == "2007", ]
+#Rampa de colores
+library(paletteer)
+library(colorBlindness)
+pal1 <- paletteer_d("colorBlindness::Blue2Orange10Steps")
+
+### Observamos los datos
+namesContinent <- c( "África", "América",
+                     "Asia", "Europa",
+                     "Oceanía")
+boxplot(gapm2007$pop ~ gapm2007$continent, 
+        xlab = "Continentes", 
+        ylab = "Esperanza de vida promedio en 2007",
+        names = namesContinent,
+        col = pal1, border = "blue4",
+        outpch = 20
+        )
+```
+
+
+## **ANOVA**   
+### **ANOVA de una vía**  
+En el ANOVA de una vía se tiene un solo factor categórico que divide los datos en grupos.
+
+Para realizar un anova usamos la función `aov()`:
+```{r}
+
+#### Realizamos la prueba
+ popANOVA <- aov(pop ~ continent, 
+                     data = gapm2007
+                     )
+ summary(popANOVA)   
+
+```
+### **Verificación de supuestos**
+#### Normalidad
+Para verificar este supuesto, comprobaremos que los residuos del modelo tengan una $p>0.05$
+```{r}
+ shapiro.test(popANOVA$residuals)
+```
+####  Homocedasticidad
+
+Para verificar este supuesto, comprobaremos que la prueba `bartlett.test()` tenga una $p>0.05$
+
+```{r}
+# Realizamos la prueba
+bartlett.test(gapm2007$pop ~ gapm2007$continent)
+```
+En este caso, no se cumplen los supuestos. No obstante, podemos aplicar una transformación de los datos para saber si de esta forma se cumplen. Las transformaciones son muy usadas en las pruebas de hipótesis. Dependiendo la naturaleza de nuestros datos, deberemos transformarlos. Las más usadas son logaritmos o raíz cuadrada. 
+
+```{r}
+# Transformamos la columna que nos interesa
+gapm2007$pop <- log10(gapm2007$pop)
+# Realizamos la prueba de Shapiro y Barlett para comprobar ahora
+popANOVA <- aov(pop ~ continent, 
+                     data = gapm2007
+                     )
+shapPop <- shapiro.test(popANOVA$residuals)
+barlPop <- bartlett.test(gapm2007$pop ~ gapm2007$continent)
+#Definimos un umbral de p
+umbral <- 0.05
+# Comprobamos si es mayor al umbral
+if (shapPop$p.value & barlPop$p.value > umbral) {
+  "Cumple los supuestos"
+}
+```
+
+Se cumplen los supuestos. Por lo que podemos seguir siendo felices y hacer una prueba post-hoc     
+  
+### Prueba post-hoc
+Esta prueba nos permite saber cuál grupo es diferente o igual a otros grupos. En esta prueba nos fijaremos en que las comparaciones tenga un valor de $p<0.05$
+
+```{r}
+# Realizamos la prueba
+popTukey <- TukeyHSD(popANOVA)
+# Extraemos los datos
+valorpTukeyOneway <- popTukey[["continent"]]
+# Verificamos que p<0.05
+ifelse(valorpTukeyOneway[ , "p adj"]  < umbral, 
+       "Significativo", "NO")
+```
+De esta prueba podemos concluir que la población promedio de África y Asia son diferentes entre sí.
+Por lo que podemos verlo de forma visual de la siguiente forma:  
+
+```{r, eval=FALSE}
+
+boxplot(gapm2007$pop ~ gapm2007$continent, 
+        xlab = "Continentes", 
+        ylab = "Población mundial 2007 (log10)",
+        names = namesContinent,
+        ylim = c(5, 9.5),
+        col = c("#B393C0", "#99caea", "#85B47B","#7fb1e0", 
+                "#6598d5" ), 
+        border = c( "#54278F","#045A9f", "#014636",
+                    "#045A9f", "#045A9f"),
+        lwd = 1,
+        outpch = 20
+        ) 
+  text(x = c(1:5), y= 9.4,
+       labels= c("A", "AB", "B",
+                 "AB", "AB"))
+
+```
+<div style="text-align:center"> 
+![ ](../imagenes/pop2007ANOVA.png){width=90%}
+</div>
+
+Otra forma de hacerlo es con la prueba de Kruskal-Wallis, la cual es la prueba NO paramétrica de este ANOVA.
+Ejemplo:
+```{r}
+gapm2007nonParametric <- gapm[gapm$year == "2007", ]
+kruskal.test(pop ~ continent, 
+                     data = gapm2007nonParametric)
+```
+El test nos indica que al menos dos de nuestros grupos difieren entre sí.
+Para saber entre cuales hay diferencias significativas (análogo a Tukey)
+
+```{r}
+pairwise.wilcox.test(gapm2007nonParametric$pop, gapm2007nonParametric$continent, 
+                     p.adjust.method = "holm" )
+```
+
+Al igula que con los datos transformados, la prueba no paramétrica nos indica que África y Asia tienen poblaciones promedio diferentes entre sí.
+
+### **ANOVA de dos vías**  
+```{r, echo=FALSE, results='hide'}
+# Calcular los cuartiles de la columna 'gdpPercap'
+cuartiles <- quantile(gapm2007$gdpPercap, probs = c(0.25, 0.5, 0.75))
+
+# Definir los límites para cada categoría
+limite_bajo <- cuartiles[1]
+limite_medio <- cuartiles[2]
+limite_alto <- cuartiles[3]
+
+# Crear una nueva columna con los niveles de ingreso económico
+gapm2007$ingresos <- cut(gapm2007$gdpPercap, 
+                      breaks = c(-Inf, limite_bajo, limite_alto, Inf), 
+                      labels = c("bajo", "medio", "alto"))
+```
+
+En ANOVA de dos vías, hay dos factores categóricos que se consideran simultáneamente.
+Permite examinar las interacciones entre los dos factores, así como los efectos principales de cada uno. El efecto de los factores puede ser aditivo (+) o multiplicativo (*).  
+El ANOVA de dos vías permite estudiar cómo influyen por sí solos cada uno de los factores sobre la variable dependiente (modelo aditivo) así como la influencia de las combinaciones que se pueden dar entre ellas (modelo con interacción).
+
+#### ANOVA dos vías aditivo    
+```{r}
+#Seleccionamos nuestros datos
+gapm2k2_7 <- gapm[gapm$year == "2002" | gapm$year == "2007", ]
+# Transformamos la columna que nos interesa
+gapm2k2_7$pop <- log10(gapm2k2_7$pop)
+gapm2k2_7$year <- as.factor(gapm2k2_7$year)
+
+# Realizamos la prueba
+popANOVAAdd <- aov(pop ~ continent+year,
+                         data = gapm2k2_7
+                         )
+summary(popANOVAAdd)
+```
+Visualizamos los datos
+```{r, eval=FALSE}
+# boxplot
+boxplot(pop ~ continent * year,
+        data = gapm2k2_7,
+        names=rep(namesContinent, 2),
+        col = c("#B393C0", "#99caea","#85B47B",
+                "#7fb1e0","#6598d5" ), 
+        border = c( "#54278F","#045A9f", "#014636",
+                    "#045A9f", "#045A9f"),
+        lwd = 1,
+        lty = sort(rep(c(1,5),5)),
+        outpch = 20)  +
+ text(x=c(3,8), y=5.4, label= c("2002", "2007"))+
+ abline( v = 5.5, col = "gray70")
+```
+
+<div style="text-align:center"> 
+![ ](../imagenes/anova2ViasBoxplot.png){width=90%}
+</div>
+
+### Verificación de supuestos  
+#### Normalidad
+Para verificar este supuesto, comprobaremos que los residuos del modelo tengan una $p>0.05$
+```{r}
+ shapiro.test(popANOVAAdd$residuals)
+```
+####  Homocedasticidad
+
+Para verificar este supuesto, comprobaremos que la prueba `bartlett.test()` tenga una $p>0.05$
+```{r}
+
+# Realizamos la prueba en función del continente
+bartlett.test(pop ~ continent, data = gapm2k2_7)
+#Realizamos la prueba en función de los ingresos
+bartlett.test(pop ~ year, data = gapm2k2_7)
+
+```
+
+### Prueba post-hoc
+Esta prueba nos permite saber cuál grupo es diferente o igual a otros grupos. En esta prueba nos fijaremos en que las comparaciones tenga un valor de $p<0.05$
+
+```{r, eval=FALSE}
+# Realizamos la prueba
+popANOVAAddTukey <- TukeyHSD(popANOVAAdd)
+# Extraemos los datos
+valorpTukeyTwoWay <- popANOVAAddTukey[["continent"]]
+# Verificamos que p<0.05
+ifelse(valorpTukeyTwoWay[ , "p adj"]  < 0.05, 
+       "Significativo", "NO")
+```
+ En este caso la población promedio de Asia durante 2002-2007 fue diferente de África y Europa, sin embargo el factor Año no es significativo para el modelo.
+ 
+#### ANOVA dos vías multiplicativo    
+```{r}
+
+# Realizamos la prueba *
+popANOVAMult <- aov(pop ~ continent*year,
+                         data = gapm2k2_7
+                         )
+summary(popANOVAMult)
+```
+### Verificación de supuestos  
+#### Normalidad
+Para verificar este supuesto, comprobaremos que los residuos del modelo tengan una $p>0.05$
+```{r}
+ shapiro.test(popANOVAMult$residuals)
+```
+####  Homocedasticidad
+
+Para verificar este supuesto, comprobaremos que la prueba `bartlett.test()` tenga una $p>0.05$
+```{r}
+
+# Realizamos la prueba en función del continente
+bartlett.test(pop ~ continent, data = gapm2k2_7)
+#Realizamos la prueba en función de los ingresos
+bartlett.test(pop ~ year, data = gapm2k2_7)
+
+# Para este caso tmb podemos usar levene
+library(car)
+leveneTest(pop ~ continent*year, data = gapm2k2_7)
+
+```
+
+### Prueba post-hoc
+Esta prueba nos permite saber cuál grupo es diferente o igual a otros grupos. En esta prueba nos fijaremos en que las comparaciones tenga un valor de $p<0.05$
+
+```{r, eval=FALSE}
+# Realizamos la prueba
+popANOVAMultTukey <- TukeyHSD(popANOVAMult)
+# Extraemos los datos
+valorpTukeyTwoWayM <- popANOVAMultTukey[["continent"]]
+# Verificamos que p<0.05
+ifelse(valorpTukeyTwoWayM[ , "p adj"]  < 0.05, 
+       "Significativo", "NO")
+```
+Igualmente en este caso la población promedio de Asia durante 2002-2007 fue diferente de África y Europa. Sin embargo, el factor Año no es significativo para el modelo.
+
+
